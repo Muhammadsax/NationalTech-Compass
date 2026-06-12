@@ -1,72 +1,210 @@
-// دالة إظهار إشعارات التوست الاحترافية
-function showToast(message) {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
-
-    const toast = document.createElement('div');
-    toast.className = "bg-academic-blue text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-4 animate-fade-in border-r-4 border-tech-blue pointer-events-auto transition-all duration-500 font-['Tajawal']";
-    toast.innerHTML = `
-        <span class="flex-grow text-sm font-medium">${message}</span>
-        <button class="text-white/70 hover:text-white transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-        </button>
-    `;
-    
-    // إغلاق يدوي عند الضغط على الزر
-    toast.querySelector('button').onclick = () => {
-        toast.classList.add('opacity-0', '-translate-y-4');
-        setTimeout(() => toast.remove(), 500);
-    };
-
-    container.appendChild(toast);
-
-    // إغلاق تلقائي بعد 5 ثوانٍ
-    setTimeout(() => {
-        if (toast.parentElement) {
-            toast.classList.add('opacity-0', '-translate-y-4');
-            setTimeout(() => toast.remove(), 500);
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>NationalTech Compass - اكتشف مستقبلك التقني</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'academic-blue': '#0D2B45',
+                        'tech-blue': '#2094D0',
+                    }
+                }
+            }
         }
-    }, 5000);
-}
+    </script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="bg-gray-50 pb-20 overflow-x-hidden">
+    <div id="toast-container" class="fixed top-5 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-3 w-full max-w-sm px-4 pointer-events-none"></div>
 
-async function submitAnswers() {
-    // 1. جمع الإجابات لـ 20 سؤالاً
-    const answers = [];
-    for (let i = 1; i <= 20; i++) {
-        const val = document.querySelector(`input[name="q${i}"]:checked`)?.value;
-        if (val) answers.push(val);
-    }
+    <header class="text-center py-10 bg-academic-blue text-white shadow-lg mb-8 relative flex flex-col items-center">
+        <img src="{{ url_for('static', filename='images/لوغو اتحاد.png') }}" alt="NationalTech Logo" class="w-32 h-32 mb-4 object-contain">
+        <h1 class="text-4xl font-bold mb-4 font-['Cairo']">اكتشف مستقبلك التقني</h1>
+        <p class="text-lg opacity-90">بوصلتك التقنية نحو التخصص الأنسب في الكلية</p>
+        
+        <div class="absolute bottom-0 left-0 w-full h-2 bg-black/20">
+            <div id="progress-bar" class="h-full bg-tech-blue transition-all duration-500 shadow-[0_0_10px_#2094D0]" style="width: 0%"></div>
+        </div>
+    </header>
 
-    if (answers.length < 20) { 
-        return showToast("يرجى الإجابة على جميع الأسئلة (20 سؤالاً) لضمان دقة النتيجة!"); 
-    }
+    <main id="main-content" class="max-w-4xl mx-auto px-4">
+        <div id="quiz-container" class="space-y-12">
+        </div>
+    </main>
 
-    // 2. إظهار واجهة التحليل (التأثير البصري)
-    document.getElementById('navigation-controls').classList.add('hidden');
-    const mainContent = document.getElementById('main-content');
-    mainContent.innerHTML = `
-        <div class="flex flex-col items-center justify-center py-32 bg-white rounded-3xl shadow-xl animate-fade-in">
-            <div class="relative w-24 h-24 mb-8">
-                <div class="absolute inset-0 rounded-full border-4 border-tech-blue/20"></div>
-                <div class="absolute inset-0 rounded-full border-4 border-t-tech-blue animate-spin"></div>
-            </div>
-            <p class="text-2xl font-bold text-academic-blue font-['Cairo'] mb-2">جاري تحليل بوصلتك التقنية</p>
-            <p class="text-gray-500 animate-pulse font-['Tajawal']">خوارزمياتنا تحدد مسارك الأنسب الآن...</p>
-        </div>`;
+    <div id="navigation-controls" class="max-w-4xl mx-auto px-4 mt-12 mb-20 text-center">
+        <button id="submit-btn" onclick="submitAnswers()" class="bg-tech-blue hover:bg-blue-600 text-white font-bold py-4 px-16 rounded-2xl text-xl shadow-lg transition-all hover:scale-105 font-['Cairo'] w-full md:w-auto">
+            تحليل النتيجة النهائية
+        </button>
+    </div>
 
-    // 3. إرسال البيانات للسيرفر
-    const response = await fetch('/get-result', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ answers: answers })
-    });
-    
-    const data = await response.json();
+    <script>
+        const sections = [
+            {
+                title: "المحور الأول: التحليل والاهتمامات التقنية",
+                questions: [
+                    { id: 1, text: "عندما تستخدم تطبيقاً جديداً لأول مرة، ما هو أول جانب تلاحظه وتدقق فيه؟", options: { software: "سرعة استجابة النظام وخلوه التام من الأخطاء والتهنيج", mobile: "جمالية التصميم وتناسق العناصر على شاشة الهاتف المعروضة", internet: "سهولة تصفح صفحات الويب وسرعة الانتقال بين الروابط المختلفة", network: "مدى استهلاك التطبيق لبيانات الإنترنت وشبكة الاتصال", cyber: "الصلاحيات التي يطلبها التطبيق ومستوى الأمان والخصوصية فيه", ai: "دقة الاقتراحات الذكية التي يقدمها ومدى فهمه لاهتماماتي الشخصية" } },
+                    { id: 2, text: "لو كان لديك مشروع تقني، ما هي المهمة التي تفضل استلامها؟", options: { software: "كتابة الكود البرمجي وبناء المنطق الأساسي للنظام", mobile: "تطوير واجهات الهواتف الذكية وضمان سلاستها", internet: "بناء وتطوير موقع الويب والمنصات السحابية للمشروع", network: "إعداد السيرفرات والبنية التحتية والربط بين الأجهزة", cyber: "تأمين بيانات المشروع وحمايته من الثغرات والاختراقات", ai: "تحليل بيانات المشروع وبناء خوارزميات ذكية لاستخراج الحلول" } }
+                ]
+            },
+            {
+                title: "المحور الثاني: منطق حل المشكلات",
+                questions: [
+                    { id: 3, text: "لو حصل خطأ مفاجئ في نظام إحدى الشركات، كيف ستتصرف لمعالجته؟", options: { software: "أقوم بمراجعة المنطق البرمجي وفحص كود بناء النظام الأساسي", mobile: "أفحص أداء التطبيق واستجابته على مختلف شاشات الهواتف", internet: "أتأكد من استقرار خوادم الويب واستجابة الصفحات للمستخدمين", network: "أفحص اتصالات الشبكة الداخلية وإعدادات الموجهات والسيرفرات", cyber: "أبدأ فوراً بالبحث عن وجود ثغرة أمنية أو محاولة اختراق خبيثة", ai: "أحلل سجلات البيانات الضخمة لمعرفة نمط الخلل ومصدره" } },
+                    { id: 4, text: "ما هو الهدف الأكبر وشغفك الأساسي الذي تطمح لتحقيقه في مجالك التقني؟", options: { software: "إنشاء برمجيات وأنظمة ضخمة تحل مشاكل المؤسسات المعقدة", mobile: "ابتكار تطبيقات هواتف ذكية مميزة يستخدمها الملايين يومياً وبسهولة", internet: "تطوير منصات ويب سحابية عالمية ومفتوحة للجميع", network: "بناء وإدارة شبكات اتصالات عملاقة ومستقرة تربط المؤسسات بكفاءة", cyber: "حماية الأنظمة الحيوية والدفاع الرقمي ضد التهديدات السيبرانية", ai: "بناء نماذج ذكاء اصطناعي تتوقع المستقبل وتتخذ قرارات ذكية" } }
+                ]
+            },
+            {
+                title: "المحور الثالث: المهارات والأدوات",
+                questions: [
+                    { id: 5, text: "أي من المواد الدراسية التالية تشعر بفضول أكبر لدراستها وفهم أعماقها؟", options: { software: "تراكيب البيانات وتصميم الخوارزميات البرمجية المعقدة", mobile: "بناء واجهات المستخدم التفاعلية والرسومية الخاصة بالتطبيقات", internet: "تطوير وبرمجة منصات ومواقع الويب المتكاملة", network: "مبادئ شبكات الحاسوب وبروتوكولات الاتصالات السلكية واللاسلكية", cyber: "أمن المعلومات، التشفير، وحماية أنظمة الحاسب والشبكات", ai: "الإحصاء، الاحتمالات، وعلم البيانات وتطبيقات الذكاء الاصطناعي" } },
+                    { id: 6, text: "ما هي بيئة العمل أو الأداة التقنية التي تفضل قضاء وقتك في استخدامها؟", options: { software: "بيئات التطوير البرمجي المتكاملة مثل VS Code أو Visual Studio", mobile: "منصات ومحاكيات تطوير تطبيقات الموبايل كـ Android Studio", internet: "أدوات مطوري الويب المتصفحية المتطورة DevTools", network: "برامج محاكاة وبناء الشبكات مثل Cisco Packet Tracer", cyber: "أنظمة وأنوات فحص الاختراق والأمان مثل Kali Linux وخوادمه", ai: "بيئات تحليل البيانات وتجربة النماذج مثل Jupyter Notebook" } }
+                ]
+            },
+            {
+                title: "المحور الرابع: التوجه الأكاديمي",
+                questions: [
+                    { id: 7, text: "أي من هذه المقررات تعتقد أنك ستبدع فيه？", options: { software: "هندسة البرمجيات", mobile: "البرمجة الشيئية (OOP)", internet: "برمجة الإنترنت", network: "تصميم الشبكات", cyber: "أمن المعلومات", ai: "مقدمة الذكاء الاصطناعي" } },
+                    { id: 8, text: "لماذا اخترت تخصصات تقنية المعلومات؟", options: { software: "لبناء أنظمة ضخمة", mobile: "لدخول سوق تطبيقات الموبايل", internet: "لأكون جزءاً من تطور الويب", network: "لفهم بنية الإنترنت التحتية", cyber: "لأكون درعاً أمنياً رقمياً", ai: "لأصنع مستقبلاً يعتمد على البيانات" } }
+                ]
+            },
+            {
+                title: "المحور الخامس: الرؤية المهنية",
+                questions: [
+                    { id: 9, text: "ما هو الدور الوظيفي المفضل لديك داخل أي فريق عمل تقني؟", options: { software: "مهندس ومصمم الهيكلية البرمجية الشاملة للنظام (Software Architect)", mobile: "مطور واجهات ومميزات تطبيق الهاتف المحمول (Mobile Developer)", internet: "مطور مواقع ومنصات ويب متكاملة من البداية للنهاية (Full-Stack Web Developer)", network: "مهندس مسؤول عن تصميم البنية التحتية والربط والشبكات (Network Engineer)", cyber: "المسؤول عن اختبار الاختراق وتأمين وحماية الثغرات الرقمية (Pentester)", ai: "محلل البيانات وباني نماذج وخوارزميات الذكاء الاصطناعي (Data Scientist)" } },
+                    { id: 10, text: "ما هي القيمة الأساسية التي تود تقديمها للمجتمع من خلال علمك وعملك التقني؟", options: { software: "بناء أنظمة برمجية مستدامة وقوية تحل المشاكل اليومية للمؤسسات والأفراد", mobile: "تطوير تطبيقات محمولة مبتكرة وسهلة الاستخدام تسرع وتسهل إنجاز الأعمال", internet: "تحويل الخدمات التقليدية إلى خدمات رقمية متاحة للجميع عبر الإنترنت بسلاسة", network: "ضمان توفير اتصالات مستقرة وآمنة تربط المجتمعات والمؤسسات ببعضها بكفاءة", cyber: "حماية خصوصية الأفراد والدفاع السيبراني عن بيانات الدولة ضد الهجمات الخبيثة", ai: "استغلال البيانات وتوظيف الذكاء الاصطناعي للتنبؤ بالحلول واتخاذ قرارات ذكية وسليمة" } }
+                ]
+            }
+        ];
 
-    // 4. تخزين البيانات مؤقتاً والانتقال لصفحة النتيجة
-    setTimeout(() => {
-        localStorage.removeItem('quizDraft');
-        sessionStorage.setItem('resultData', JSON.stringify(data));
-        window.location.href = '/result';
-    }, 2500); 
-}
+        const container = document.getElementById('quiz-container');
+        sections.forEach((section, index) => {
+            let sectionHtml = `
+            <div class="space-y-6 animate-fade-in">
+                <h3 class="text-2xl font-bold text-academic-blue border-r-4 border-tech-blue pr-4 font-['Cairo']">${section.title}</h3>
+                <div class="grid grid-cols-1 gap-6">`;
+            
+            section.questions.forEach(q => {
+                sectionHtml += `
+                <div class="question-card bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-all hover:shadow-md" data-qid="${q.id}">
+                    <p class="text-lg font-bold mb-4 text-academic-blue leading-relaxed">${q.id}. ${q.text}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">`;
+                
+                for (let [val, label] of Object.entries(q.options)) {
+                    sectionHtml += `
+                    <label class="option-label flex items-center p-3 border rounded-lg cursor-pointer hover:border-tech-blue hover:bg-blue-50 transition-all">
+                        <input type="radio" name="q${q.id}" value="${val}" class="ml-3 accent-tech-blue" onchange="markAsAnswered(${q.id})">
+                        <span class="text-gray-700 text-sm">${label}</span>
+                    </label> `;
+                }
+                sectionHtml += `</div></div>`;
+            });
+            sectionHtml += `</div></div>`;
+            container.innerHTML += sectionHtml;
+        });
+
+        function saveDraft() {
+            const draft = { answers: {} };
+            for (let i = 1; i <= 10; i++) {
+                const selected = document.querySelector(`input[name="q${i}"]:checked`);
+                if (selected) draft.answers[`q${i}`] = selected.value;
+            }
+            localStorage.setItem('quizDraft', JSON.stringify(draft));
+        }
+
+        function loadDraft() {
+            const saved = localStorage.getItem('quizDraft');
+            if (!saved) return;
+            try {
+                const draft = JSON.parse(saved);
+                for (let [qid, val] of Object.entries(draft.answers)) {
+                    const input = document.querySelector(`input[name="${qid}"][value="${val}"]`);
+                    if (input) {
+                        input.checked = true;
+                        const numId = qid.replace('q', '');
+                        markAsAnswered(numId, false);
+                    }
+                }
+                updateProgress();
+            } catch (e) { console.error(e); }
+        }
+        
+        window.onload = loadDraft;
+
+        function updateProgress() {
+            const total = 10;
+            const answered = document.querySelectorAll('input[type="radio"]:checked').length;
+            const progress = (answered / total) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+        }
+
+        function markAsAnswered(qid, shouldSave = true) {
+            document.querySelector(`[data-qid="${qid}"]`).classList.add('border-tech-blue/30', 'bg-blue-50/20');
+            updateProgress();
+            if (shouldSave) saveDraft();
+        }
+
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = "bg-academic-blue text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-4 animate-fade-in border-r-4 border-tech-blue pointer-events-auto transition-all duration-500 font-['Tajawal']";
+            toast.innerHTML = `
+                <span class="flex-grow text-sm font-medium">${message}</span>
+                <button class="text-white/70 hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            `;
+            toast.querySelector('button').onclick = () => {
+                toast.classList.add('opacity-0', '-translate-y-4');
+                setTimeout(() => toast.remove(), 500);
+            };
+            container.appendChild(toast);
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.classList.add('opacity-0', '-translate-y-4');
+                    setTimeout(() => toast.remove(), 500);
+                }
+            }, 5000);
+        }
+
+        async function submitAnswers() {
+            const answers = [];
+            for (let i = 1; i <= 10; i++) {
+                const val = document.querySelector(`input[name="q${i}"]:checked`)?.value;
+                if (val) answers.push(val);
+            }
+            if (answers.length < 10) { 
+                return showToast("يرجى الإجابة على جميع الأسئلة (10 أسئلة) لضمان دقة النتيجة!");
+            }
+            document.getElementById('navigation-controls').classList.add('hidden');
+            const mainContent = document.getElementById('main-content');
+            mainContent.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-20 md:py-32 bg-white rounded-3xl shadow-xl animate-fade-in mx-4">
+                    <div class="relative w-24 h-24 mb-8">
+                        <div class="absolute inset-0 rounded-full border-4 border-tech-blue/20"></div>
+                        <div class="absolute inset-0 rounded-full border-4 border-t-tech-blue animate-spin"></div>
+                    </div>
+                    <p class="text-xl md:text-2xl font-bold text-academic-blue font-['Cairo'] mb-2 text-center">جاري تحليل بوصلتك التقنية</p>
+                    <p class="text-gray-500 animate-pulse font-['Tajawal']">خوارزمياتنا تحدد مسارك الأنسب الآن...</p>
+                </div>`;
+            const response = await fetch('/get-result', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ answers: answers })
+            });
+            const data = await response.json();
+            setTimeout(() => {
+                localStorage.removeItem('quizDraft');
+                sessionStorage.setItem('resultData', JSON.stringify(data));
+                window.location.href = '/result';
+            }, 2500);
+        }
+    </script>
+</body>
+</html>

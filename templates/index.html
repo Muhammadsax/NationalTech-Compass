@@ -20,7 +20,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body class="bg-gray-50 pb-20 overflow-x-hidden">
-    <!-- حاوية الإشعارات (Toast Container) -->
     <div id="toast-container" class="fixed top-5 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-3 w-full max-w-sm px-4 pointer-events-none"></div>
 
     <header class="text-center py-10 bg-academic-blue text-white shadow-lg mb-8 relative flex flex-col items-center">
@@ -28,74 +27,57 @@
         <h1 class="text-4xl font-bold mb-4 font-['Cairo']">اكتشف مستقبلك التقني</h1>
         <p class="text-lg opacity-90">بوصلتك التقنية نحو التخصص الأنسب في الكلية</p>
         
-        <!-- شريط التقدم -->
         <div class="absolute bottom-0 left-0 w-full h-2 bg-black/20">
             <div id="progress-bar" class="h-full bg-tech-blue transition-all duration-500 shadow-[0_0_10px_#2094D0]" style="width: 5%"></div>
         </div>
     </header>
 
     <main id="main-content" class="max-w-4xl mx-auto px-4">
-        <div id="quiz-container" class="relative min-h-[400px]">
-            <!-- يتم حقن الأقسام هنا برمجياً -->
+        <div id="quiz-container" class="space-y-12">
         </div>
     </main>
 
-    <!-- منطقة أزرار التحكم -->
-    <div id="navigation-controls" class="max-w-4xl mx-auto px-4 mt-10 flex justify-between items-center">
-        <button id="prev-btn" onclick="prevStep()" class="invisible bg-white text-academic-blue border-2 border-academic-blue font-bold py-3 px-8 rounded-xl transition-all hover:bg-gray-100 font-['Cairo']">
-            السابق
-        </button>
-        <button id="next-btn" onclick="nextStep()" class="bg-tech-blue hover:bg-blue-600 text-white font-bold py-3 px-12 rounded-xl text-lg shadow-lg transition-all hover:scale-105 font-['Cairo']">
-            التالي
+    <div id="navigation-controls" class="max-w-4xl mx-auto px-4 mt-12 mb-20 text-center">
+        <button id="submit-btn" onclick="submitAnswers()" class="bg-tech-blue hover:bg-blue-600 text-white font-bold py-4 px-16 rounded-2xl text-xl shadow-lg transition-all hover:scale-105 font-['Cairo'] w-full md:w-auto">
+            تحليل النتيجة النهائية
         </button>
     </div>
 
     <script>
-        let currentStep = 0;
         const sections = [
             {
                 title: "المحور الأول: التحليل والاهتمامات التقنية",
                 questions: [
-                    { id: 1, text: "ما هو الجانب الذي يثير فضولك عند استخدام أي نظام؟", options: { software: "هيكلية الكود وبناؤه", mobile: "سلاسة الواجهة اللمسية", internet: "سرعة تحميل الصفحات", network: "استقرار جودة الإشارة", cyber: "مدى خصوصية بياناتي", ai: "قدرة النظام على فهمي" } },
-                    { id: 2, text: "ماذا يمثل لك الحاسوب في جوهره؟", options: { software: "أداة لحل المشاكل المنطقية", mobile: "جهاز محمول للتفاعل السريع", internet: "بوابة لخدمات الويب", network: "عقدة في شبكة عالمية", cyber: "حصن يجب تأمينه", ai: "عقل اصطناعي قابل للتعلم" } },
-                    { id: 3, text: "أي من هذه المصادر التقنية تثير اهتمامك أكثر؟", options: { software: "معايير IEEE وكتب البرمجيات", mobile: "إرشادات Google و Apple", internet: "معايير منظمة W3C", network: "شهادات سيسكو (CCNA)", cyber: "معايير ISO الأمني", ai: "أبحاث تعلم الآلة" } },
-                    { id: 4, text: "ما هو رأيك في توجه إنترنت الأشياء (IoT)؟", options: { software: "برمجيات تحتاج لإدارة دقيقة", mobile: "تطبيقات للتحكم عن بعد", internet: "خدمات ويب متصلة بكل شيء", network: "بنية تحتية ضخمة ومعقدة", cyber: "باب جديد للتهديدات الأمنية", ai: "مصدر هائل للبيانات الذكية" } }
+                    { id: 1, text: "عندما تستخدم تطبيقاً جديداً لأول مرة، ما هو أول جانب تلاحظه وتدقق فيه؟", options: { software: "سرعة استجابة النظام وخلوه التام من الأخطاء والتهنيج", mobile: "جمالية التصميم وتناسق العناصر على شاشة الهاتف المعروضة", internet: "سهولة تصفح صفحات الويب وسرعة الانتقال بين الروابط المختلفة", network: "مدى استهلاك التطبيق لبيانات الإنترنت وشبكة الاتصال", cyber: "الصلاحيات التي يطلبها التطبيق ومستوى الأمان والخصوصية فيه", ai: "دقة الاقتراحات الذكية التي يقدمها ومدى فهمه لاهتماماتي الشخصية" } },
+                    { id: 2, text: "لو كان لديك مشروع تقني، ما هي المهمة التي تفضل استلامها؟", options: { software: "كتابة الكود البرمجي وبناء المنطق الأساسي للنظام", mobile: "تطوير واجهات الهواتف الذكية وضمان سلاستها", internet: "بناء وتطوير موقع الويب والمنصات السحابية للمشروع", network: "إعداد السيرفرات والبنية التحتية والربط بين الأجهزة", cyber: "تأمين بيانات المشروع وحمايته من الثغرات والاختراقات", ai: "تحليل بيانات المشروع وبناء خوارزميات ذكية لاستخراج الحلول" } }
                 ]
             },
             {
                 title: "المحور الثاني: منطق حل المشكلات",
                 questions: [
-                    { id: 5, text: "كيف تفكر في حل لغز منطقي معقد؟", options: { software: "بتقسيمه لخطوات متسلسلة", mobile: "بالبحث عن أبسط تفاعل", internet: "بالبحث عن حلول سحابية", network: "بالنظر للروابط بين العناصر", cyber: "بالبحث عن نقطة الضعف", ai: "بجمع الأنماط والبيانات" } },
-                    { id: 6, text: "ماذا تفعل لو اكتشفت ثغرة أو خطأ في نظام؟", options: { software: "أراجع المنطق البرمجي", mobile: "أفحص استجابة الواجهة", internet: "أبحث عن حل في بروتوكولات الويب", network: "أفحص إعدادات السيرفر", cyber: "أقوم بتحليلها وتوثيقها فوراً", ai: "أحلل البيانات لمعرفة الضرر" } },
-                    { id: 7, text: "كيف تفضل التعامل مع البيانات الكبيرة؟", options: { software: "بتنظيمها في قواعد بيانات", mobile: "بمزامنتها مع السحابة", internet: "بعرضها بشكل سريع عبر الويب", network: "بتأمين مسارات نقلها", cyber: "بتشفيرها ومنع الوصول لها", ai: "باستخراج التوقعات منها" } },
-                    { id: 8, text: "عند وقوع مشكلة تقنية فجأة، أين تتجه؟", options: { software: "تحليل متطلبات النظام", mobile: "فحص تجربة المستخدم", internet: "مراجعة خادم الويب", network: "فحص البنية التحتية", cyber: "البحث عن اختراق محتمل", ai: "تحليل سجلات الأداء" } }
+                    { id: 3, text: "لو حصل خطأ مفاجئ في نظام إحدى الشركات، كيف ستتصرف لمعالجته؟", options: { software: "أقوم بمراجعة المنطق البرمجي وفحص كود بناء النظام الأساسي", mobile: "أفحص أداء التطبيق واستجابته على مختلف شاشات الهواتف", internet: "أتأكد من استقرار خوادم الويب واستجابة الصفحات للمستخدمين", network: "أفحص اتصالات الشبكة الداخلية وإعدادات الموجهات والسيرفرات", cyber: "أبدأ فوراً بالبحث عن وجود ثغرة أمنية أو محاولة اختراق خبيثة", ai: "أحلل سجلات البيانات الضخمة لمعرفة نمط الخلل ومصدره" } },
+                    { id: 4, text: "ما هو الهدف الأكبر وشغفك الأساسي الذي تطمح لتحقيقه في مجالك التقني؟", options: { software: "إنشاء برمجيات وأنظمة ضخمة تحل مشاكل المؤسسات المعقدة", mobile: "ابتكار تطبيقات هواتف ذكية مميزة يستخدمها الملايين يومياً وبسهولة", internet: "تطوير منصات ويب سحابية عالمية ومفتوحة للجميع", network: "بناء وإدارة شبكات اتصالات عملاقة ومستقرة تربط المؤسسات بكفاءة", cyber: "حماية الأنظمة الحيوية والدفاع الرقمي ضد التهديدات السيبرانية", ai: "بناء نماذج ذكاء اصطناعي تتوقع المستقبل وتتخذ قرارات ذكية" } }
                 ]
             },
             {
                 title: "المحور الثالث: المهارات والأدوات",
                 questions: [
-                    { id: 9, text: "أي مهارة تود تطويرها في الوقت الحالي؟", options: { software: "كتابة وثائق التحليل (SRS)", mobile: "تصميم واجهات (UI/UX)", internet: "برمجة الـ Back-end", network: "إعداد وصيانة السيرفرات", cyber: "اختبار الاختراق الأخلاقي", ai: "بناء نماذج تعلم الآلة" } },
-                    { id: 10, text: "ما هي لغة البرمجة التي تجذبك أكثر؟", options: { software: "Java أو C#", mobile: "Kotlin أو Swift", internet: "PHP أو JavaScript", network: "Python لإدارة الشبكات", cyber: "C أو Assembly", ai: "Python للبيانات" } },
-                    { id: 11, text: "أي جهاز تود امتلاكه لفهم تفاصيله؟", options: { software: "محطة عمل برمجية قوية", mobile: "أحدث هاتف ذكي متطور", internet: "خادم ويب فائق الأداء", network: "راوتر احترافي متقدم", cyber: "جهاز فحص أمني مشفر", ai: "وحدة معالجة رسومية (GPU)" } },
-                    { id: 12, text: "ما هو المحرر أو الأداة الأهم بالنسبة لك؟", options: { software: "Visual Studio Code", mobile: "Android Studio / Xcode", internet: "Web Browsers / DevTools", network: "Terminal / Packet Tracer", cyber: "Kali Linux Tools", ai: "Jupyter Notebook / Python" } }
+                    { id: 5, text: "أي من المواد الدراسية التالية تشعر بفضول أكبر لدراستها وفهم أعماقها؟", options: { software: "تراكيب البيانات وتصميم الخوارزميات البرمجية المعقدة", mobile: "بناء واجهات المستخدم التفاعلية والرسومية الخاصة بالتطبيقات", internet: "تطوير وبرمجة منصات ومواقع الويب المتكاملة", network: "مبادئ شبكات الحاسوب وبروتوكولات الاتصالات السلكية واللاسلكية", cyber: "أمن المعلومات، التشفير، وحماية أنظمة الحاسب والشبكات", ai: "الإحصاء، الاحتمالات، وعلم البيانات وتطبيقات الذكاء الاصطناعي" } },
+                    { id: 6, text: "ما هي بيئة العمل أو الأداة التقنية التي تفضل قضاء وقتك في استخدامها؟", options: { software: "بيئات التطوير البرمجي المتكاملة مثل VS Code أو Visual Studio", mobile: "منصات ومحاكيات تطوير تطبيقات الموبايل كـ Android Studio", internet: "أدوات مطوري الويب المتصفحية المتطورة DevTools", network: "برامج محاكاة وبناء الشبكات مثل Cisco Packet Tracer", cyber: "أنظمة وأنوات فحص الاختراق والأمان مثل Kali Linux وخوادمه", ai: "بيئات تحليل البيانات وتجربة النماذج مثل Jupyter Notebook" } }
                 ]
             },
             {
                 title: "المحور الرابع: التوجه الأكاديمي",
                 questions: [
-                    { id: 13, text: "أي من هذه المقررات تعتقد أنك ستبدع فيه؟", options: { software: "هندسة البرمجيات", mobile: "البرمجة الشيئية (OOP)", internet: "برمجة الإنترنت", network: "تصميم الشبكات", cyber: "أمن المعلومات", ai: "مقدمة الذكاء الاصطناعي" } },
-                    { id: 14, text: "ما هو هدفك الأساسي من الدراسة؟", options: { software: "إدارة دورة حياة الأنظمة", mobile: "بناء تطبيقات تلمس يد المستخدم", internet: "تطوير خدمات الويب العالمية", network: "ضمان استقرار اتصالات العالم", cyber: "حماية الفضاء الرقمي", ai: "جعل الآلات تفكر بذكاء" } },
-                    { id: 15, text: "لماذا اخترت تخصصات تقنية المعلومات؟", options: { software: "لبناء أنظمة ضخمة", mobile: "لدخول سوق تطبيقات الموبايل", internet: "لأكون جزءاً من تطور الويب", network: "لفهم بنية الإنترنت التحتية", cyber: "لأكون درعاً أمنياً رقمياً", ai: "لأصنع مستقبلاً يعتمد على البيانات" } },
-                    { id: 16, text: "ما هو الجانب الأهم في مشروع تخرجك؟", options: { software: "دقة التحليل والتوثيق", mobile: "تفاعل المستخدم مع التطبيق", internet: "سرعة وتوفر الخدمة أونلاين", network: "كفاءة الربط بين الأجهزة", cyber: "قوة الحماية ضد الاختراق", ai: "دقة النتائج والقدرة على التنبؤ" } }
+                    { id: 7, text: "أي من هذه المقررات تعتقد أنك ستبدع فيه؟", options: { software: "هندسة البرمجيات", mobile: "البرمجة الشيئية (OOP)", internet: "برمجة الإنترنت", network: "تصميم الشبكات", cyber: "أمن المعلومات", ai: "مقدمة الذكاء الاصطناعي" } },
+                    { id: 8, text: "لماذا اخترت تخصصات تقنية المعلومات؟", options: { software: "لبناء أنظمة ضخمة", mobile: "لدخول سوق تطبيقات الموبايل", internet: "لأكون جزءاً من تطور الويب", network: "لفهم بنية الإنترنت التحتية", cyber: "لأكون درعاً أمنياً رقمياً", ai: "لأصنع مستقبلاً يعتمد على البيانات" } }
                 ]
             },
             {
                 title: "المحور الخامس: الرؤية المهنية",
                 questions: [
-                    { id: 17, text: "أي بيئة عمل تحلم بها مستقبلاً؟", options: { software: "شركات هندسة النظم والبرمجيات", mobile: "استوديوهات تطوير التطبيقات", internet: "شركات حلول الويب والسحابة", network: "مراكز إدارة البيانات والاتصالات", cyber: "وكالات الأمن السيبراني", ai: "مراكز الأبحاث والذكاء الاصطناعي" } },
-                    { id: 18, text: "ما هو دورك المفضل داخل أي فريق تقني؟", options: { software: "محلل ومصمم نظم", mobile: "مطور واجهات تفاعلية", internet: "مطور ويب متكامل", network: "مهندس بنية تحتية", cyber: "أخصائي أمان واختراق", ai: "عالم بيانات" } },
-                    { id: 19, text: "أين تجد نفسك بعد 5 سنوات من التخرج؟", options: { software: "مدير مشاريع برمجية", mobile: "خبير في تطوير تطبيقات الموبايل", internet: "مطوّر ويب سحابي محترف", network: "كبير مهندسي الشبكات", cyber: "مستشار أمن سيبراني", ai: "كبير علماء البيانات" } },
-                    { id: 20, text: "ما هي القيمة التي تود تقديمها للمجتمع؟", options: { software: "حلول برمجية مستدامة", mobile: "تطبيقات تسهل حياة الناس", internet: "نشر المعلومات والخدمات رقمياً", network: "توصيل الناس ببعضهم بكفاءة", cyber: "خلق بيئة رقمية آمنة للجميع", ai: "تحويل البيانات لقرارات ذكية" } }
+                    { id: 9, text: "ما هو الدور الوظيفي المفضل لديك داخل أي فريق عمل تقني؟", options: { software: "مهندس ومصمم الهيكلية البرمجية الشاملة للنظام (Software Architect)", mobile: "مطور واجهات ومميزات تطبيق الهاتف المحمول (Mobile Developer)", internet: "مطور مواقع ومنصات ويب متكاملة من البداية للنهاية (Full-Stack Web Developer)", network: "مهندس مسؤول عن تصميم البنية التحتية والربط والشبكات (Network Engineer)", cyber: "المسؤول عن اختبار الاختراق وتأمين وحماية الثغرات الرقمية (Pentester)", ai: "محلل البيانات وباني نماذج وخوارزميات الذكاء الاصطناعي (Data Scientist)" } },
+                    { id: 10, text: "ما هي القيمة الأساسية التي تود تقديمها للمجتمع من خلال علمك وعملك التقني؟", options: { software: "بناء أنظمة برمجية مستدامة وقوية تحل المشاكل اليومية للمؤسسات والأفراد", mobile: "تطوير تطبيقات محمولة مبتكرة وسهلة الاستخدام تسرع وتسهل إنجاز الأعمال", internet: "تحويل الخدمات التقليدية إلى خدمات رقمية متاحة للجميع عبر الإنترنت بسلاسة", network: "ضمان توفير اتصالات مستقرة وآمنة تربط المجتمعات والمؤسسات ببعضها بكفاءة", cyber: "حماية خصوصية الأفراد والدفاع السيبراني عن بيانات الدولة ضد الهجمات الخبيثة", ai: "استغلال البيانات وتوظيف الذكاء الاصطناعي للتنبؤ بالحلول واتخاذ قرارات ذكية وسليمة" } }
                 ]
             }
         ];
@@ -103,22 +85,22 @@
         const container = document.getElementById('quiz-container');
         sections.forEach((section, index) => {
             let sectionHtml = `
-                <div id="section-${index}" class="section-step ${index === 0 ? 'active' : 'hidden'} space-y-6 animate-fade-in">
-                    <h3 class="text-2xl font-bold text-academic-blue border-r-4 border-tech-blue pr-4 font-['Cairo']">${section.title}</h3>
-                    <div class="grid grid-cols-1 gap-6">`;
+            <div class="space-y-6 animate-fade-in">
+                <h3 class="text-2xl font-bold text-academic-blue border-r-4 border-tech-blue pr-4 font-['Cairo']">${section.title}</h3>
+                <div class="grid grid-cols-1 gap-6">`;
             
             section.questions.forEach(q => {
                 sectionHtml += `
-                    <div class="question-card bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-all hover:shadow-md" data-qid="${q.id}">
-                        <p class="text-lg font-bold mb-4 text-academic-blue">${q.id}. ${q.text}</p>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">`;
+                <div class="question-card bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-all hover:shadow-md" data-qid="${q.id}">
+                    <p class="text-lg font-bold mb-4 text-academic-blue leading-relaxed">${q.id}. ${q.text}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">`;
                 
                 for (let [val, label] of Object.entries(q.options)) {
                     sectionHtml += `
-                        <label class="option-label flex items-center p-3 border rounded-lg cursor-pointer hover:border-tech-blue hover:bg-blue-50 transition-all">
-                            <input type="radio" name="q${q.id}" value="${val}" class="ml-3 accent-tech-blue" onchange="markAsAnswered(${q.id})">
-                            <span class="text-gray-700 text-sm">${label}</span>
-                        </label>`;
+                    <label class="option-label flex items-center p-3 border rounded-lg cursor-pointer hover:border-tech-blue hover:bg-blue-50 transition-all">
+                        <input type="radio" name="q${q.id}" value="${val}" class="ml-3 accent-tech-blue" onchange="markAsAnswered(${q.id})">
+                        <span class="text-gray-700 text-sm">${label}</span>
+                    </label> `;
                 }
                 sectionHtml += `</div></div>`;
             });
@@ -126,95 +108,99 @@
             container.innerHTML += sectionHtml;
         });
 
-        function saveDraft() {
-            const draft = {
-                currentStep: currentStep,
-                answers: {}
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = "bg-academic-blue text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-4 animate-fade-in border-r-4 border-tech-blue pointer-events-auto transition-all duration-500 font-['Tajawal']";
+            toast.innerHTML = `
+                <span class="flex-grow text-sm font-medium">${message}</span>
+                <button class="text-white/70 hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            `;
+            toast.querySelector('button').onclick = () => {
+                toast.classList.add('opacity-0', '-translate-y-4');
+                setTimeout(() => toast.remove(), 500);
             };
-            for (let i = 1; i <= 20; i++) {
+            container.appendChild(toast);
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.classList.add('opacity-0', '-translate-y-4');
+                    setTimeout(() => toast.remove(), 500);
+                }
+            }, 5000);
+        }
+
+        async function submitAnswers() {
+            const answers = [];
+            for (let i = 1; i <= 10; i++) {
+                const val = document.querySelector(`input[name="q${i}"]:checked`)?.value;
+                if (val) answers.push(val);
+            }
+            if (answers.length < 10) { 
+                return showToast("يرجى الإجابة على جميع الأسئلة (10 أسئلة) لضمان دقة النتيجة!");
+            }
+            document.getElementById('navigation-controls').classList.add('hidden');
+            const mainContent = document.getElementById('main-content');
+            mainContent.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-20 md:py-32 bg-white rounded-3xl shadow-xl animate-fade-in mx-4">
+                    <div class="relative w-24 h-24 mb-8">
+                        <div class="absolute inset-0 rounded-full border-4 border-tech-blue/20"></div>
+                        <div class="absolute inset-0 rounded-full border-4 border-t-tech-blue animate-spin"></div>
+                    </div>
+                    <p class="text-xl md:text-2xl font-bold text-academic-blue font-['Cairo'] mb-2 text-center">جاري تحليل بوصلتك التقنية</p>
+                    <p class="text-gray-500 animate-pulse font-['Tajawal']">خوارزمياتنا تحدد مسارك الأنسب الآن...</p>
+                </div>`;
+            
+            const response = await fetch('/get-result', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ answers: answers })
+            });
+            const data = await response.json();
+            setTimeout(() => {
+                localStorage.removeItem('quizDraft');
+                sessionStorage.setItem('resultData', JSON.stringify(data));
+                window.location.href = '/result';
+            }, 2500);
+        }
+
+        function saveDraft() {
+            const draft = { answers: {} };
+            for (let i = 1; i <= 10; i++) {
                 const selected = document.querySelector(`input[name="q${i}"]:checked`);
                 if (selected) draft.answers[`q${i}`] = selected.value;
             }
             localStorage.setItem('quizDraft', JSON.stringify(draft));
         }
 
-        function loadDraft() {
-            const saved = localStorage.getItem('quizDraft');
-            if (saved) {
-                const draft = JSON.parse(saved);
-                currentStep = draft.currentStep || 0;
-                for (const [name, value] of Object.entries(draft.answers)) {
-                    const radio = document.querySelector(`input[name="${name}"][value="${value}"]`);
-                    if (radio) {
-                        radio.checked = true;
-                        markAsAnswered(name.replace('q', ''), false);
-                    }
-                }
-            }
-        }
-
-        function updateUI() {
-            document.querySelectorAll('.section-step').forEach((el, i) => {
-                el.classList.toggle('hidden', i !== currentStep);
-                el.classList.toggle('active', i === currentStep);
-            });
-
-            document.getElementById('prev-btn').style.visibility = currentStep === 0 ? 'hidden' : 'visible';
-            const nextBtn = document.getElementById('next-btn');
-            
-            if (currentStep === sections.length - 1) {
-                nextBtn.innerText = "تحليل النتيجة النهائية";
-                nextBtn.classList.replace('bg-tech-blue', 'bg-green-600');
-            } else {
-                nextBtn.innerText = "التالي";
-                nextBtn.classList.replace('bg-green-600', 'bg-tech-blue');
-            }
-
-            const progress = ((currentStep + 1) / sections.length) * 100;
+        function updateProgress() {
+            const total = 10;
+            const answered = document.querySelectorAll('input[type="radio"]:checked').length;
+            const progress = (answered / total) * 100;
             document.getElementById('progress-bar').style.width = `${progress}%`;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function validateStep() {
-            const currentSectionQuestions = sections[currentStep].questions;
-            for (let q of currentSectionQuestions) {
-                if (!document.querySelector(`input[name="q${q.id}"]:checked`)) {
-                    showToast("يرجى الإجابة على جميع الأسئلة في هذا القسم قبل المتابعة");
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        function nextStep() {
-            if (!validateStep()) return;
-            if (currentStep < sections.length - 1) {
-                currentStep++;
-                updateUI();
-                saveDraft();
-            } else {
-                submitAnswers();
-            }
-        }
-
-        function prevStep() {
-            if (currentStep > 0) {
-                currentStep--;
-                updateUI();
-                saveDraft();
-            }
         }
 
         function markAsAnswered(qid, shouldSave = true) {
             document.querySelector(`[data-qid="${qid}"]`).classList.add('border-tech-blue/30', 'bg-blue-50/20');
+            updateProgress();
             if (shouldSave) saveDraft();
         }
 
-        // بدء التشغيل
-        loadDraft();
-        updateUI();
+        window.onload = () => {
+            const saved = localStorage.getItem('quizDraft');
+            if (!saved) return;
+            const draft = JSON.parse(saved);
+            for (let [qid, val] of Object.entries(draft.answers)) {
+                const input = document.querySelector(`input[name="${qid}"][value="${val}"]`);
+                if (input) {
+                    input.checked = true;
+                    markAsAnswered(qid.replace('q', ''), false);
+                }
+            }
+            updateProgress();
+        };
     </script>
-    
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

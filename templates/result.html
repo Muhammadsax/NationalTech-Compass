@@ -23,7 +23,7 @@
     <div id="result-box" class="max-w-3xl mx-auto my-12 p-8 bg-white rounded-2xl shadow-2xl border-t-8 border-tech-blue text-right">
         <h1 class="text-3xl font-bold text-academic-blue mb-4 font-['Cairo']">التخصص المقترح لك هو:</h1>
         <h2 id="major-name" class="text-4xl font-black text-tech-blue mb-6 font-['Cairo']"></h2>
-        <p class="text-lg text-gray-600 mb-8 border-b pb-6">بناءً على تحليل إجاباتك العشرين، أنت تمتلك سمات تتوافق مع هذا المسار التقني في الكلية.</p>
+        <p class="text-lg text-gray-600 mb-8 border-b pb-6">بناءً على تحليل إجاباتك العشر، أنت تمتلك سمات تتوافق مع هذا المسار التقني في الكلية.</p>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <div class="p-4 bg-gray-50 border-r-4 border-tech-blue rounded-l-lg"><strong class="block text-academic-blue mb-2">لماذا هذا التخصص؟</strong> <p id="reason" class="text-sm text-gray-700"></p></div>
@@ -43,13 +43,15 @@
         // استرجاع البيانات من sessionStorage التي تم تخزينها في script.js
         const data = JSON.parse(sessionStorage.getItem('resultData'));
         if (data) {
-
             // تقسيم النص عند القوس ليكون الاسم الإنجليزي في سطر جديد
-            document.getElementById('major-name').innerHTML = data.name.replace(' (', '<br>(');
+            document.getElementById('major-name').innerHTML = data.name ? data.name.replace(' (', '<br>(') : 'تخصص تقني';
             document.getElementById('reason').innerText = data.reason;
             document.getElementById('skills').innerText = data.skills;
             document.getElementById('jobs').innerText = data.jobs;
             document.getElementById('challenge-text').innerText = data.challenge;
+        } else {
+            // إعادة توجيه المستخدم للرئيسية إذا لم تكن هناك نتائج
+            window.location.href = '/';
         }
     </script>
 </body>
